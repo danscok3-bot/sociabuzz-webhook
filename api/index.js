@@ -1,42 +1,45 @@
+let donations = []; // memory sementara
+
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ ok: false });
-  }
+  // =============================
+  // POST: terima webhook
+  // =============================
+  if (req.method === "POST") {
+    const payload = req.body || {};
+    const donation = payload.donation || {};
 
-  try {
-    const data = req.body || {};
-    const donation = data.donation || {};
+    const data = {
+      id: Date.now(),
+      nama: donation.name || "Anonymous",
+      amount: donation.amount || 0,
+      message: donation.message || "",
+      timestamp: Date.now()
+    };
 
-    // Nama donatur (fallback aman)
-    const donorName =
-      donation.name ||
-      donation.username ||
-      donation.sender_name ||
-      "Anonymous";
+    donations.push(data);
 
-    // Jumlah donasi
-    const amount =
-      donation.amount ||
-      donation.amount_raw ||
-      donation.price ||
-      0;
+    // simpan max 20 biar aman
+    if (donations.length > 20) {
+      donations.shift();
+    }
 
-    // Pesan donasi (opsional)
-    const message = donation.message || "";
+    console.log("DONASI MASUK:", data);
 
-    console.log("=== DONASI SOCIABUZZ ===");
-    console.log("Nama   :", donorName);
-    console.log("Jumlah :", amount);
-    console.log("Pesan  :", message);
-
-    return res.status(200).json({
-      ok: true,
-      donor: donorName,
-      amount: amount
-    });
-
-  } catch (err) {
-    console.error("WEBHOOK ERROR:", err);
     return res.status(200).json({ ok: true });
   }
+
+  // =============================
+  // GET: diambil Roblox
+  // =============================
+  if (req.method === "GET") {
+    const result = [...donations];
+    donations = []; // clear setelah diambil
+
+    return res.status(200).json({
+      success: true,
+      donations: result
+    });
+  }
+
+  return res.status(405).json({ ok: false });
 }
