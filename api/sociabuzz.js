@@ -1,11 +1,26 @@
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+
+  // 🔹 TERIMA GET (buat test Sociabuzz)
+  if (req.method === "GET") {
+    return res.status(200).json({
+      success: true,
+      message: "Webhook aktif (GET test OK)"
+    });
   }
 
-  console.log("===== DONASI MASUK =====");
-  console.log(req.body);
-  console.log("========================");
+  // 🔹 TERIMA POST (donasi asli)
+  if (req.method === "POST") {
+    console.log("===== DONASI MASUK =====");
+    console.log(req.body);
+    console.log("========================");
 
-  res.status(200).json({ success: true });
+    return res.status(200).json({
+      success: true
+    });
+  }
+
+  // 🔹 Method lain
+  return res.status(405).json({
+    error: "Method not allowed"
+  });
 }
